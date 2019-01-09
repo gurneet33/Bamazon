@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var chalk = require('chalk');
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -68,11 +69,12 @@ function buyProduct() {
                         ],
                         function (error) {
                             if (error) throw err;
-                            console.log("Thank you for your business. Your total is $", (answer.quantity * chosenItem.price));;
+                            console.log(chalk.bgBlue("Thank you for your business."), " Your total is", chalk.underline.bold(" $", (answer.quantity * chosenItem.price)));;
                             quit();
                         })
                 } else {
-                    console.log("Sorry insufficient quantity. We only have", answer.quantity, "of", chosenItem.product_name, "available")
+                    console.log("Sorry", chalk.bgRed("insufficient quantity"), "We only have", chalk.underline.bold(chosenItem.stock_quantity), "of", chalk.underline.bold(chosenItem.product_name), "available")
+                    quit();
                 }
             })
 
