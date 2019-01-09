@@ -73,7 +73,7 @@ function quit() {
 
             {
                 type: "confirm",
-                message: "DO you wish to quit:",
+                message: "Do you wish to quit:",
                 name: "confirm",
                 default: true
             }
@@ -91,12 +91,10 @@ function quit() {
 function viewProducts() {
     connection.query("SELECT * FROM products GROUP BY item_id", function (err, results) {
         if (err) throw err;
-        // once you have the items, prompt the user for which they'd like to bid on
-
         for (var i = 0; i < results.length; i++) {
             console.log(results[i].item_id, results[i].product_name);
         }
-
+        quit();
     });
 }
 
@@ -105,9 +103,9 @@ function lowInventory() {
         if (err) throw err;
 
         for (var i = 0; i < results.length; i++) {
-            console.log(results[i].item_id, results[i].product_name);
+            console.log(results[i].item_id, "|", results[i].product_name, "|", results[i].stock_quantity);
         }
-
+        quit();
     });
 }
 
@@ -186,7 +184,7 @@ function addProduct() {
             {
                 type: "input",
                 message: "How much do you wish to add?",
-                name: "stock",
+                name: "quantity",
                 default: 0
             },
             // Here we ask the user to confirm.
@@ -197,60 +195,25 @@ function addProduct() {
                 default: true
             }
         ])
-        .then(function (inquirerResponse) {
-            // If the inquirerResponse confirms, we displays the inquirerResponse's username and pokemon from the answers.
-            if (inquirerResponse.confirm) {
-                console.log("\nWelcome " + inquirerResponse.username);
-                console.log("Your " + inquirerResponse.pokemon + " is ready for battle!\n");
+        .then(function (answer) {
+            // If the answer confirms, we displays the answer's username and pokemon from the answers.
+            if (answer.confirm) {
+                connection.query("INSERT INTO products SET ?", {
+                        product_name: answer.productName,
+                        department_name: answer.department,
+                        price: answer.productPrice,
+                        stock_quantity: answer.quantity
+
+                    },
+                    function (error) {
+                        if (error) throw error;
+                        console.log("\nYou added " + chalk.blue(answer.productName), "to", answer.department);
+                        quit();
+                    })
+
             } else {
-                console.log("\nThat's okay " + inquirerResponse.username + ", come again when you are more sure.\n");
+                console.log("\nThat's okay  come again when you are more sure.\n");
             }
         });
 
 }
-// connection.query("SELECT * FROM products GROUP BY item_id", function (err, results) {
-//     inquirer
-//         .prompt([{
-//                 name: "choice",
-//                 type: "rawlist",
-//                 choices: function () {
-//                     var choiceArray = [];
-//                     for (var i = 0; i < results.length; i++) {
-//                         choiceArray.push(results[i].product_name);
-//                     }
-//                     return choiceArray;
-//                 },
-//                 message: "What product would you like to add into"
-//             },
-//             {
-//                 name: "quantity",
-//                 type: "input",
-//                 message: "How much would you like to add?"
-//             }
-//         ]).then(function (answer) {
-//             // get the information of the chosen item
-//             var chosenItem;
-//             for (var i = 0; i < results.length; i++) {
-//                 if (results[i].product_name === answer.choice) {
-//                     chosenItem = results[i];
-//                 }
-//             }
-
-//             // // determine if the quantity is present
-//             connection.query("INSERT INTO products SET ? WHERE ?",
-//                 [{
-//                         stock_quantity: (chosenItem.stock_quantity + parseInt(answer.quantity))
-//                     },
-//                     {
-//                         product_name: answer.choice
-//                     }
-//                 ],
-//                 function (error) {
-//                     if (error) throw err;
-//                     console.log("Done");
-//                     quit();
-//                 })
-
-
-//         });
-// });
