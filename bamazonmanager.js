@@ -154,6 +154,56 @@ function updateInventory() {
                     ],
                     function (error) {
                         if (error) throw err;
+                        console.log("done");
+                        quit();
+                    })
+
+
+            });
+    });
+
+}
+
+function updateInventory() {
+    connection.query("SELECT * FROM products GROUP BY item_id", function (err, results) {
+        inquirer
+            .prompt([{
+                    name: "choice",
+                    type: "rawlist",
+                    choices: function () {
+                        var choiceArray = [];
+                        for (var i = 0; i < results.length; i++) {
+                            choiceArray.push(results[i].product_name);
+                        }
+                        return choiceArray;
+                    },
+                    message: "What product would you like to buy?"
+                },
+                {
+                    name: "quantity",
+                    type: "input",
+                    message: "How much would you like to add?"
+                }
+            ]).then(function (answer) {
+                // get the information of the chosen item
+                var chosenItem;
+                for (var i = 0; i < results.length; i++) {
+                    if (results[i].product_name === answer.choice) {
+                        chosenItem = results[i];
+                    }
+                }
+
+                // // determine if the quantity is present
+                connection.query("INSERT INTO products SET ? WHERE ?",
+                    [{
+                            stock_quantity: (chosenItem.stock_quantity + parseInt(answer.quantity))
+                        },
+                        {
+                            product_name: answer.choice
+                        }
+                    ],
+                    function (error) {
+                        if (error) throw err;
                         console.log("Done");
                         quit();
                     })
