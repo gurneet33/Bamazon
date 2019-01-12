@@ -1,6 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 var chalk = require('chalk');
+var Table = require("cli-table")
 
 // create the connection information for the sql database
 var connection = mysql.createConnection({
@@ -21,13 +22,24 @@ connection.connect(function (err) {
 
 
 function viewProducts() {
+    var table = new Table({
+        head: ['ID', 'Product Name', 'Price'],
+        colWidths: [10, 30, 30]
+    });
     connection.query("SELECT * FROM products GROUP BY item_id", function (err, results) {
         if (err) throw err;
         // once you have the items, prompt the user for which they'd like to bid on
 
         for (var i = 0; i < results.length; i++) {
-            console.log(results[i].item_id, '|', results[i].product_name, '|', "$", results[i].price);
+            var id = results[i].item_id,
+                name = results[i].product_name,
+                price = '$' + results[i].price;
+
+            table.push(
+                [id, name, price])
         }
+        console.log("-------------- ")
+        console.log(table.toString());
         buyProduct();
     });
 }
